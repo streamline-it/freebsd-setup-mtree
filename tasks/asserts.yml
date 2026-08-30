@@ -1,0 +1,31 @@
+---
+# task file for freebsd-setup-mtree
+
+- name: ensure key variables are defined and have values
+  ansible.builtin.assert:
+    that:
+      - freebsd_setup_mtree_base_dir is defined
+      - freebsd_setup_mtree_base_dir is truthy
+      - freebsd_setup_mtree_log is defined
+      - freebsd_setup_mtree_log is truty
+      - freebsd_setup_mtree_script_check is defined
+      - freebsd_setup_mtree_script_check is truthy
+      - freebsd_setup_mtree_script_create_specfile is defined
+      - freebsd_setup_mtree_script_create_specfile is truthy
+      - freebsd_setup_mtree_command is defined
+      - freebsd_setup_mtree_command is truthy
+      - freebsd_security_chflags_command is defined
+      - freebsd_security_chflags_command is truthy
+      - freebsd_setup_mtree_directories is defined
+      - freebsd_setup_mtree_directories is truthy
+      - freebsd_setup_mtree_sha_algorithm is defined
+      - freebsd_setup_mtree_sha_algorithm is truthy
+      - freebsd_setup_mtree_spec_mode is defined
+      - freebsd_setup_mtree_spec_mode is truthy
+      - freebsd_setup_mtree_script_mode is defined
+      - freebsd_setup_mtree_script_mode is truthy
+      - freebsd_setup_mtree_log_mode is defined
+      - freebsd_setup_mtree_log_mode is truthy
+      - freebsd_setup_mtree_cron_minute is defined
+      - freebsd_setup_mtree_cron_minute is truthy 
+    fail_msg: "Key variables have not been defined and have values"

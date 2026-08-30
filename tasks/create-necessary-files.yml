@@ -1,0 +1,43 @@
+---
+# tasks file for freebsd-setup-mtree
+
+# ------------------------------------------------------------
+# Create the protected mtree directory
+ ------------------------------------------------------------
+
+- name: Create mtree specification directory
+  ansible.builtin.file:
+    path: "{{ freebsd_security_mtree_base_dir }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+# ------------------------------------------------------------
+# Create the integrity log
+# ------------------------------------------------------------
+
+- name: Create mtree log
+  ansible.builtin.file:
+    path: "{{ freebsd_security_mtree_log }}"
+    state: touch
+    owner: root
+    group: wheel
+    mode: "{{ freebsd_security_mtree_log_mode }}"
+    modification_time: preserve
+    access_time: preserve
+
+# ------------------------------------------------------------
+# Make the log system append-only.
+#
+# This prevents existing log entries from being modified or
+# deleted once kern.securelevel >= 1.
+# ------------------------------------------------------------
+
+- name: Set system append-only flag on mtree log
+  changed_when: true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_security_chflags_command }}
+      sappnd
+      {{ freebsd_security_mtree_log }}

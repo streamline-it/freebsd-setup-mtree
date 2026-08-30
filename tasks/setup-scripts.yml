@@ -1,0 +1,46 @@
+---
+# tasks file for freebsd-setup-mtree
+
+# ------------------------------------------------------------
+# Install the mtree checking script from a Jinja2 template.
+# ------------------------------------------------------------
+
+- name: Install mtree checking script
+  ansible.builtin.template:
+    src: freebsd_security_mtree_check.sh.j2
+    dest: "{{ freebsd_security_mtree_script_check }}"
+    owner: root
+    group: wheel
+    mode: "{{ freebsd_security_mtree_script_mode }}"
+
+# ------------------------------------------------------------
+# Install the mtree create spec file script from a Jinja2 template.
+# ------------------------------------------------------------
+
+- name: Install mtree create specfile script
+  ansible.builtin.template:
+    src: freebsd_security_mtree_create_specfile.sh.j2
+    dest: "{{ freebsd_security_mtree_script_create_specfile }}"
+    owner: root
+    group: wheel
+    mode: "{{ freebsd_security_mtree_script_mode }}"
+
+# ------------------------------------------------------------
+# Protect the scripts 
+# ------------------------------------------------------------
+
+- name: Set schg on mtree checking script
+  changed_when: true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_security_chflags_command }}
+      schg
+      {{ freebsd_security_mtree_script_check }}
+
+- name: Set schg on mtree create specfile script
+  changed_when: true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_security_chflags_command }}
+      schg
+      {{ freebsd_security_mtree_script_create_specfile }}

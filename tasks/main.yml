@@ -1,0 +1,23 @@
+---
+# tasks file for freebsd-setup-mtree
+
+- name: notify user if OS isn't FreeBSD
+  when: ansible_os_family == "FreeBSD"
+  ansible.builtin.debug:
+    msg: "This role is designed to run on FreeBSD only"
+
+- name: check assertions
+  when: ansible_os_family == "FreeBSD"
+  ansible.builtin.include_tasks: asserts.yml
+
+- name: call tasks to ensure necessary files/directories exist
+  when: ansible_os_family == "FreeBSD"
+  ansible.builtin.include_tasks: create-necessary-files.yml
+
+- name: call tasks to ensure scripts exists
+  when: ansible_os_family == "FreeBSD"
+  ansible.builtin.include_tasks: setup-scripts.yml
+
+- name: call tasks to ensure cronjob is in place
+  when: ansible_os_family == "FreeBSD"
+  ansible.builtin.include_tasks: setup-cronjob.yml

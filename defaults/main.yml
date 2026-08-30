@@ -1,0 +1,25 @@
+---
+# defaults file for freebsd-setup-mtree
+
+freebsd_setup_mtree_base_dir: /var/db/mtree
+freebsd_setup_mtree_log: /var/log/mtree_log.log
+freebsd_setup_mtree_script_check: /usr/local/sbin/freebsd_setup_mtree_check.sh
+freebsd_setup_mtree_script_create_specfile: /usr/local/sbin/freebsd_setup_mtree_check.sh
+
+freebsd_setup_mtree_command: /usr/sbin/mtree
+freebsd_security_chflags_command: /bin/chflags
+
+freebsd_setup_mtree_directories:
+  - /bin
+  - /sbin
+  - /usr/bin
+  - /usr/sbin
+  - /usr/local/bin
+
+freebsd_setup_mtree_sha_algorithm: sha256digest
+
+freebsd_setup_mtree_spec_mode: "0400"
+freebsd_setup_mtree_script_mode: "0500"
+freebsd_setup_mtree_log_mode: "0600"
+
+freebsd_setup_mtree_cron_minute: "*/30"
