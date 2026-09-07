@@ -8,18 +8,13 @@
 # ------------------------------------------------------------
 
 - name: Configure mtree integrity cron job
-  regexp: >-
-        ^{{ freebsd_security_mtree_cron_minute | regex_escape }}
-        \* \* \* \* root
-        {{ freebsd_security_mtree_script | regex_escape }}$
-      line: >-
-        {{ freebsd_security_mtree_cron_minute }}
-        * * * * root
-        {{ freebsd_security_mtree_script }}
-      insertafter: EOF
-      owner: root
-      group: wheel
-      mode: "0644"
-      state: present
-      ansible.builtin.lineinfile:
-        path: /etc/crontab
+  ansible.builtin.cron:
+    cron_file: validate_mtree
+    name: mtree_validation
+    user: root
+    job: "{{ freebsd_setup_mtree_script_check }}"
+    minute: "{{ freebsd_setup_mtree_cron_minute }}"
+    hour: "{{ freebsd_setup_mtree_cron_hour }}"
+    day: "{{ freebsd_setup_mtree_cron_day }}"
+    month: "{{ freebsd_setup_mtree_cron_month }}"
+    weekday: "{{ freebsd_setup_mtree_cron_day_of_week }}"

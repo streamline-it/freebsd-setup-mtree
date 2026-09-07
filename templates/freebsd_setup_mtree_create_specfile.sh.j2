@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+results_path="{{ freebsd_setup_mtree_base_dir }}/" # path for spec files 
+mtree_seed_value=1234567890
+
+# loop through each directory and create a mtree spec file
+for curr_directory in {% for item in freebsd_setup_mtree_directories %}{{ item }} {% endfor %}; do
+	# create the current directory's mtree specfile filename
+	transformed_filename=$(echo "$curr_directory" | tr "/" "-")
+	results_filename="mtree-specfile$transformed_filename"
+	results_filepath="$results_path/$results_filename"
+        # remove immutable flag
+	chflags noschg "$results_filepath"
+	# generate the mtree specfile
+	mtree -s "$mtree_seed_value" -c -K cksum,sha512 -p "$curr_directory" > "$results_filepath"
+	# set file to immutable
+	chflags schg "$results_filepath"
+done

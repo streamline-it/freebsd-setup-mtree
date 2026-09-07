@@ -7,15 +7,15 @@
       - freebsd_setup_mtree_base_dir is defined
       - freebsd_setup_mtree_base_dir is truthy
       - freebsd_setup_mtree_log is defined
-      - freebsd_setup_mtree_log is truty
+      - freebsd_setup_mtree_log is truthy
       - freebsd_setup_mtree_script_check is defined
       - freebsd_setup_mtree_script_check is truthy
       - freebsd_setup_mtree_script_create_specfile is defined
       - freebsd_setup_mtree_script_create_specfile is truthy
       - freebsd_setup_mtree_command is defined
       - freebsd_setup_mtree_command is truthy
-      - freebsd_security_chflags_command is defined
-      - freebsd_security_chflags_command is truthy
+      - freebsd_setup_mtree_chflags_command is defined
+      - freebsd_setup_mtree_chflags_command is truthy
       - freebsd_setup_mtree_directories is defined
       - freebsd_setup_mtree_directories is truthy
       - freebsd_setup_mtree_sha_algorithm is defined

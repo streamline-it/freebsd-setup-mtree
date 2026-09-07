@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+# define directories to provide mtree spec files for
+
+results_path="{{ freebsd_setup_mtree_base_dir }}" # path for spec files 
+tmp_current_specfile_name=$( date +%F )
+tmp_current_specfile_filepath="$results_path/$tmp_current_specfile_name"
+mtree_seed_value=123456
+log_file_path="/var/log"
+mtree_log_filepath="{{ freebsd_setup_mtree_compare_log }}"
+mtree_run_log_filepath="{{ freebsd_setup_mtree_log }}"
+
+# loop through each directory and check each mtree spec file
+for curr_directory in {% for item in freebsd_setup_mtree_directories %} {{ item }}{% endfor %}; do
+	# create the current directory's mtree specfile filename
+	transformed_filename=$(echo "$curr_directory" | tr "/" "-")
+	results_filename="mtree-specfile$transformed_filename"
+	results_filepath="$results_path/$results_filename"
+	# computer the mtree specfiles
+	mtree -s "$mtree_seed_value"  -p "$curr_directory" < "$results_filepath" >> "$tmp_current_specfile_filepath"
+	num_lines=$(wc -l "$tmp_current_specfile_filepath" | awk '{ print $1 }')
+	# log the incident, if there was a modification that was detected
+	if [ $num_lines -gt 0 ]; then
+		# a modification was found, log the incident
+		todays_date=$(date +%F)
+		printf "%s\t%s\n%s\n" "$todays_date" "mtree detected modification from following spec file $results_filename" "Details" >> "$mtree_log_filepath"
+		cat "$tmp_current_specfile_filepath" >> "$mtree_log_filepath"
+	fi
+	# get rid of prior directory's spec file
+	rm "$tmp_current_specfile_filepath"
+done
+
+# log the fact that the compare ran
+
+todays_date_time=$(date +%F-%T)
+printf "%s\n" "$todays_date_time validated mtree specfiles" >> "$mtree_run_log_filepath"

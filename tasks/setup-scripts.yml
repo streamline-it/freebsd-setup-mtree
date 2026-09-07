@@ -2,28 +2,92 @@
 # tasks file for freebsd-setup-mtree
 
 # ------------------------------------------------------------
+# first if scripts exist, if yes, remove immutable flag
+# ------------------------------------------------------------
+
+- name: check if check script exists and save state
+  changed_when: false
+  register: freebsd_setup_mtree_check_script_stat
+  ansible.builtin.stat:
+    path: "{{ freebsd_setup_mtree_script_check }}"
+    get_attributes: true
+
+- name: check if check script exists and save state
+  changed_when: false
+  register: freebsd_setup_mtree_create_specfile_script_stat
+  ansible.builtin.stat:
+    path: "{{ freebsd_setup_mtree_script_create_specfile }}"
+    get_attributes: true
+
+- name: remove schg on mtree checking script
+  when: freebsd_setup_mtree_check_script_stat['stat']['exists'] == true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_setup_mtree_chflags_command }}
+      noschg
+      {{ freebsd_setup_mtree_script_check }}
+
+- name: remove schg on mtree create specfile script
+  when: freebsd_setup_mtree_create_specfile_script_stat['stat']['exists'] == true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_setup_mtree_chflags_command }}
+      noschg
+      {{ freebsd_setup_mtree_script_create_specfile }}
+
+# ------------------------------------------------------------
 # Install the mtree checking script from a Jinja2 template.
 # ------------------------------------------------------------
 
 - name: Install mtree checking script
   ansible.builtin.template:
-    src: freebsd_security_mtree_check.sh.j2
-    dest: "{{ freebsd_security_mtree_script_check }}"
+    src: freebsd_setup_mtree_check.sh.j2
+    dest: "{{ freebsd_setup_mtree_script_check }}"
     owner: root
     group: wheel
-    mode: "{{ freebsd_security_mtree_script_mode }}"
+    mode: "{{ freebsd_setup_mtree_script_mode }}"
 
 # ------------------------------------------------------------
 # Install the mtree create spec file script from a Jinja2 template.
 # ------------------------------------------------------------
 
-- name: Install mtree create specfile script
+#
+# A little explanation for the following.  The tempate module 
+# fails if I try to include it's path to /usr/local/sbin.  This
+# has to do with the mounting in zfs and ansile failing an atomic
+# re-write from edna's /home/ temp location to the final destination.
+# So I need to copy to a temp location in the template task.  Then
+# copy to the unltimate path.  Then get rid of the temp.
+
+- name: get a temp filename for the temp location of the create specfile script
+  register: freebsd_setup_mtree_tmpfilename
+  changed_when: false
+  ansible.builtin.tempfile:
+    path: /tmp
+    state: file
+    prefix: freebsd_setup_mtree_
+    suffix: .sh
+
+- name: drop mtree create specfile script in temp location
   ansible.builtin.template:
-    src: freebsd_security_mtree_create_specfile.sh.j2
-    dest: "{{ freebsd_security_mtree_script_create_specfile }}"
+    src: freebsd_setup_mtree_create_specfile.sh.j2
+    dest: "{{ freebsd_setup_mtree_tmpfilename['path'] }}"
     owner: root
     group: wheel
-    mode: "{{ freebsd_security_mtree_script_mode }}"
+    mode: "{{ freebsd_setup_mtree_script_mode }}"
+
+- name: ensure the create specfile script exists under the permanent location
+  ansible.builtin.copy:
+    src: "{{ freebsd_setup_mtree_tmpfilename['path'] }}"
+    dest: "{{ freebsd_setup_mtree_script_create_specfile }}"
+    mode: "{{ freebsd_setup_mtree_script_mode }}"
+    force: true
+    remote_src: true
+
+- name: remove tmp version of the create specfile script
+  ansible.builtin.file:
+    path: "{{ freebsd_setup_mtree_tmpfilename['path'] }}"
+    state: absent
 
 # ------------------------------------------------------------
 # Protect the scripts 
@@ -33,14 +97,14 @@
   changed_when: true
   ansible.builtin.command:
     cmd: >-
-      {{ freebsd_security_chflags_command }}
+      {{ freebsd_setup_mtree_chflags_command }}
       schg
-      {{ freebsd_security_mtree_script_check }}
+      {{ freebsd_setup_mtree_script_check }}
 
 - name: Set schg on mtree create specfile script
   changed_when: true
   ansible.builtin.command:
     cmd: >-
-      {{ freebsd_security_chflags_command }}
+      {{ freebsd_setup_mtree_chflags_command }}
       schg
-      {{ freebsd_security_mtree_script_create_specfile }}
+      {{ freebsd_setup_mtree_script_create_specfile }}

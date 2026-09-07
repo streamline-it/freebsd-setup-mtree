@@ -3,11 +3,11 @@
 
 # ------------------------------------------------------------
 # Create the protected mtree directory
- ------------------------------------------------------------
+# ------------------------------------------------------------
 
 - name: Create mtree specification directory
   ansible.builtin.file:
-    path: "{{ freebsd_security_mtree_base_dir }}"
+    path: "{{ freebsd_setup_mtree_base_dir }}"
     state: directory
     owner: root
     group: wheel
@@ -19,11 +19,11 @@
 
 - name: Create mtree log
   ansible.builtin.file:
-    path: "{{ freebsd_security_mtree_log }}"
+    path: "{{ freebsd_setup_mtree_log }}"
     state: touch
     owner: root
     group: wheel
-    mode: "{{ freebsd_security_mtree_log_mode }}"
+    mode: "{{ freebsd_setup_mtree_log_mode }}"
     modification_time: preserve
     access_time: preserve
 
@@ -38,6 +38,14 @@
   changed_when: true
   ansible.builtin.command:
     cmd: >-
-      {{ freebsd_security_chflags_command }}
+      {{ freebsd_setup_mtree_chflags_command }}
       sappnd
-      {{ freebsd_security_mtree_log }}
+      {{ freebsd_setup_mtree_log }}
+
+- name: Set system append-only flag on mtree compare log
+  changed_when: true
+  ansible.builtin.command:
+    cmd: >-
+      {{ freebsd_setup_mtree_chflags_command }}
+      sappnd
+      {{ freebsd_setup_mtree_compare_log }}
