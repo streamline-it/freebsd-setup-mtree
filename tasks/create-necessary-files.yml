@@ -14,7 +14,7 @@
     mode: "0755"
 
 # ------------------------------------------------------------
-# Create the integrity log
+# Create the mtree run log
 # ------------------------------------------------------------
 
 - name: Create mtree log
@@ -28,7 +28,7 @@
     access_time: preserve
 
 # ------------------------------------------------------------
-# Make the log system append-only.
+# Make the run log system append-only.
 #
 # This prevents existing log entries from being modified or
 # deleted once kern.securelevel >= 1.
@@ -41,6 +41,27 @@
       {{ freebsd_setup_mtree_chflags_command }}
       sappnd
       {{ freebsd_setup_mtree_log }}
+
+# ------------------------------------------------------------
+# Create the integrity log
+# ------------------------------------------------------------
+
+- name: Create mtree compare log
+  ansible.builtin.file:
+    path: "{{ freebsd_setup_mtree_compare_log }}"
+    state: touch
+    owner: root
+    group: wheel
+    mode: "{{ freebsd_setup_mtree_log_mode }}"
+    modification_time: preserve
+    access_time: preserve
+
+# ------------------------------------------------------------
+# Make the compare log system append-only.
+#
+# This prevents existing log entries from being modified or
+# deleted once kern.securelevel >= 1.
+# ------------------------------------------------------------
 
 - name: Set system append-only flag on mtree compare log
   changed_when: true
