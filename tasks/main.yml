@@ -11,6 +11,7 @@
   ansible.builtin.include_tasks: asserts.yml
 
 - name: get OS security level
+  changed_when: false
   register: freebsd_setup_mtree_os_securelevel
   ansible.builtin.shell:
     cmd: "{{ freebsd_setup_mtree_sysctl_cmd }} {{ freebsd_setup_mtree_sysctl_key }} | {{ freebsd_setup_mtree_awk_cmd }} '{ print $2 }'"
@@ -18,15 +19,13 @@
 - name: call tasks to ensure necessary files/directories exist
   when: 
     - ansible_os_family == "FreeBSD" 
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-1"
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-0"
+    - freebsd_setup_mtree_os_securelevel['stdout'] == "-1" or freebsd_setup_mtree_os_securelevel['stdout'] == "-0"
   ansible.builtin.include_tasks: create-necessary-files.yml
 
 - name: call tasks to ensure scripts exists
   when: 
     - ansible_os_family == "FreeBSD"
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-1"
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-0"
+    - freebsd_setup_mtree_os_securelevel['stdout'] == "-1" or freebsd_setup_mtree_os_securelevel['stdout'] == "-0"
   ansible.builtin.include_tasks: setup-scripts.yml
 
 - name: call tasks to ensure cronjob is in place
@@ -34,10 +33,17 @@
     - ansible_os_family == "FreeBSD"
   ansible.builtin.include_tasks: setup-cronjob.yml
 
+- name: check to see if specfile(s) already exists
+  register: freebsd_setup_mtree_specfiles
+  changed_when: false
+  failed_when: freebsd_setup_mtree_specfiles['rc'] > 1
+  ansible.builtin.shell:
+    cmd: "/bin/ls {{ freebsd_setup_mtree_base_dir }}/"
+
 - name: ensure spec file(s) are created
   when:
     - ansible_os_family == "FreeBSD"
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-1"
-    - freebsd_setup_mtree_os_securelevel['stdout'] != "-0"
+    - freebsd_setup_mtree_specfiles['stdout'] is not truthy
+    - freebsd_setup_mtree_os_securelevel['stdout'] == "-1" or freebsd_setup_mtree_os_securelevel['stdout'] == "-0"
   ansible.builtin.command:
     cmd: "{{ freebsd_setup_mtree_script_create_specfile }}"
