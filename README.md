@@ -70,6 +70,15 @@ freebsd_setup_mtree_cron_month: "*"
 
 # cronjob argument for day of week
 freebsd_setup_mtree_cron_day_of_week: "*"
+
+
+
+# vars file for freebsd-setup-mtree
+
+freebsd_setup_mtree_sysctl_key: kern.securelevel
+freebsd_setup_mtree_awk_cmd: /usr/bin/awk
+freebsd_setup_mtree_sysctl_cmd: /sbin/sysctl
+
 Dependencies
 ------------
 

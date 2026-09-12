@@ -28,4 +28,7 @@
       - freebsd_setup_mtree_log_mode is truthy
       - freebsd_setup_mtree_cron_minute is defined
       - freebsd_setup_mtree_cron_minute is truthy 
+      - freebsd_setup_mtree_sysctl_key
+      - freebsd_setup_mtree_awk_cmd
+      - freebsd_setup_mtree_sysctl_cmd
     fail_msg: "Key variables have not been defined and have values"
